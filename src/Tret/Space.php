@@ -53,7 +53,7 @@ class Space extends Base
 				'replacement' 	=> array(
 						//'\1\2. \4',
 						'$m[1].$m[2]."." .( $m[5] == "." ? "" : " ").$m[4].$m[5]',
-						'$m[1].$m[2]."." .(in_array(EMT_Lib::strtolower($m[3]), $this->domain_zones)? "":( $m[4] == "." ? "" : " ")). $m[3].$m[4]'
+						'$m[1].$m[2]."." .(in_array(Emuravjev\Mdash\Lib::strtolower($m[3]), $this->domain_zones)? "":( $m[4] == "." ? "" : " ")). $m[3].$m[4]'
 						),
 			),
 		'autospace_after_hellips' => array(

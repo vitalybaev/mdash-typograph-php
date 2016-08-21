@@ -3,6 +3,10 @@ PHP версия Типографа Муравьева
 
 Данный репозиторий содержит PSR-4 совместимый пакет Composer, созданный на основе кода [Типографа Муравьева](http://mdash.ru/)
 
+Evgeny Muravjev Typograph, http://mdash.ru Authors: Evgeny Muravjev & Alexander Drutsa
+
+EMT - Evgeny Muravjev Typograph
+
 ### Установка
 
 Для установки с помощью Composer, выполните команду:

@@ -38,6 +38,11 @@ class Number extends Base
 				'pattern' 		=> '/([a-zа-яё0-9])\^([\d]{1,3})([^а-яёa-z0-9]|$)/ieu',
 				'replacement' 	=> '$m[1] . $this->tag($this->tag($m[2],"small"),"sup") . $m[3]'
 			),
+		'dimensions_sup' => array(
+				'description'	=> 'Верхний индекс для см2, м2...',
+				'pattern' 		=> '/(м|мм|см|дм|км|гм|km|dm|cm|mm)([\d]{1,3})([^а-яёa-z0-9]|$)/ieu',
+				'replacement' 	=> '$m[1] . $this->tag($this->tag($m[2],"small"),"sup") . $m[3]'
+			),
 		'simple_fraction' => array(
 				'description'	=> 'Замена дробей 1/2, 1/4, 3/4 на соответствующие символы',
 				'pattern' 		=> array('/(^|\D)1\/(2|4)(\D)/', '/(^|\D)3\/4(\D)/'),

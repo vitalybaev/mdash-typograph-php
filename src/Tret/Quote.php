@@ -5,7 +5,7 @@ namespace Emuravjev\Mdash\Tret;
 use Emuravjev\Mdash\Lib;
 
 /**
- * @see Emuravjev\Mdash\Tret\Base
+ * @see \Emuravjev\Mdash\Tret\Base
  */
 
 class Quote extends Base

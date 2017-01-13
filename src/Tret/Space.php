@@ -3,7 +3,7 @@
 namespace Emuravjev\Mdash\Tret;
 
 /**
- * @see Emuravjev\Mdash\Tret\Base
+ * @see \Emuravjev\Mdash\Tret\Base
  */
 
 class Space extends Base

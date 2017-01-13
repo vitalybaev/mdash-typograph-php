@@ -40,7 +40,7 @@ class Number extends Base
 			),
 		'dimensions_sup' => array(
 				'description'	=> 'Верхний индекс для см2, м2...',
-				'pattern' 		=> '/(м|мм|см|дм|км|гм|km|dm|cm|mm)([\d]{1,3})([^а-яёa-z0-9]|$)/ieu',
+				'pattern' 		=> '/(м|мм|см|дм|км|гм|m|km|dm|cm|mm)([\d]{1,3})([^а-яёa-z0-9]|$)/ieu',
 				'replacement' 	=> '$m[1] . $this->tag($this->tag($m[2],"small"),"sup") . $m[3]'
 			),
 		'simple_fraction' => array(

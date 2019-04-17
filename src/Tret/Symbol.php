@@ -16,20 +16,21 @@ class Symbol extends Base
 	public $classes = array(
 			'nowrap'           => 'word-spacing:nowrap;',
 		);
-
+	
+	
 	public $title = "Специальные символы";
-	public $rules = array(
+	public $rules = array(	
 		'tm_replace' => array(
 				'description'	=> 'Замена (tm) на символ торговой марки',
-				'pattern' 		=> '/([\040\t])?\(tm\)/i',
+				'pattern' 		=> '/([\040\t])?\(tm\)/i', 
 				'replacement' 	=> '&trade;'
 			),
 		'r_sign_replace' => array(
 				'description'	=> 'Замена (R) на символ зарегистрированной торговой марки',
 				'pattern' 		=> array(
-					'/(.|^)\(r\)(.|$)/ie',
-					//'/([^\>]|^)\(r\)([^\<]|$)/ie',
-					//'/\>\(r\)\</i',
+					'/(.|^)\(r\)(.|$)/ie', 
+					//'/([^\>]|^)\(r\)([^\<]|$)/ie', 
+					//'/\>\(r\)\</i', 
 					),
 				'replacement' 	=> array(
 					//'$m[1].$this->tag("&reg;", "sup").$m[2]',
@@ -40,14 +41,14 @@ class Symbol extends Base
 		'copy_replace' => array(
 				'description'	=> 'Замена (c) на символ копирайт',
 				'pattern' 		=> array(
-							'/\((c|с)\)\s+/iu',
-							'/\((c|с)\)($|\.|,|!|\?)/iu',
+							'/\((c|с)\)\s+/iu', 
+							'/\((c|с)\)($|\.|,|!|\?)/iu', 
 							),
 				'replacement' 	=> array(
 							'&copy;&nbsp;',
 							'&copy;\2',
 							),
-			),
+			),		
 		'apostrophe' => array(
 				'description'	=> 'Расстановка правильного апострофа в текстах',
 				'pattern' 		=> '/(\s|^|\>|\&rsquo\;)([a-zа-яё]{1,})\'([a-zа-яё]+)/ui',
@@ -76,9 +77,9 @@ class Symbol extends Base
 				'description'	=> 'Замена стрелок вправо-влево на html коды',
 				//'pattern' 		=> array('/(\s|\>|\&nbsp\;|^)\-\>($|\s|\&nbsp\;|\<)/', '/(\s|\>|\&nbsp\;|^|;)\<\-(\s|\&nbsp\;|$|\<)/', '/→/u', '/←/u'),
 				//'pattern' 		=> array('/\-\>($|\s|\&nbsp\;|\<)/', '/(\s|\>|\&nbsp\;|^|;)\<\-(\s|\&nbsp\;|$|\<)/', '/→/u', '/←/u'),
-				'pattern' 		=> array('/\-\>/', '/\<\-/', '/→/u', '/←/u'),
+				'pattern' 		=> array('/([^-]|^)\-\>/', '/\<\-/', '/→/u', '/←/u'),
 				//'replacement' 	=> array('\1&rarr;\2', '\1&larr;\2', '&rarr;', '&larr;' ),
-				'replacement' 	=> array('&rarr;', '&larr;', '&rarr;', '&larr;' ),
-			),
+				'replacement' 	=> array('\1&rarr;', '&larr;', '&rarr;', '&larr;' ),
+			),			
 		);
 }

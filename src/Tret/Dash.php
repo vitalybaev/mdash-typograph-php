@@ -18,8 +18,8 @@ class Dash extends Base
 		'mdash' => array(
 				'description'	=> 'Тире после кавычек, скобочек, пунктуации',
 				'pattern' 		=> array(
-						'/([a-zа-яё0-9]+|\,|\:|\)|\&(ra|ld)quo\;|\|\"|\>)(\040|\t)(—|\-|\&mdash\;)(\s|$|\<)/ui',
-						'/(\,|\:|\)|\")(—|\-|\&mdash\;)(\s|$|\<)/ui',
+						'/([a-zа-яё0-9]+|\,|\:|\)|\&(ra|ld)quo\;|\|\"|\>)(\040|\t)(—|\-|\&mdash\;)(\s|$|\<)/ui', 
+						'/(\,|\:|\)|\")(—|\-|\&mdash\;)(\s|$|\<)/ui', 
 						),
 				'replacement' 	=> array(
 						'\1&nbsp;&mdash;\5',
@@ -35,7 +35,7 @@ class Dash extends Base
 				'description'	=> 'Тире после знаков восклицания, троеточия и прочее',
 				'pattern' 		=> '/(\.|\!|\?|\&hellip\;)(\040|\t|\&nbsp\;)(\-|\&mdash\;)(\040|\t|\&nbsp\;)/',
 				'replacement' 	=> '\1 &mdash;&nbsp;'
-			),
+			),						
 		'iz_za_pod' => array(
 				'description'	=> 'Расстановка дефисов между из-за, из-под',
 				'pattern' 		=> '/(\s|\&nbsp\;|\>|^)(из)(\040|\t|\&nbsp\;)\-?(за|под)([\.\,\!\?\:\;]|\040|\&nbsp\;)/uie',
@@ -67,9 +67,9 @@ class Dash extends Base
 						),
 				'replacement' 	=> '($m[1] == "&nbsp;" ? " " : $m[1]) . $m[2]."-".$m[4] . ($m[5] == "&nbsp;"? " " : $m[5])'
 			),
-
-
-
+		
+			
+					
 		);
-
+	
 }

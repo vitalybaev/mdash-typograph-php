@@ -103,11 +103,11 @@ class Lib
 	 *
 	 * <code>
 	 *  // Remove UTF-8 chars:
-	 * 	$str = Lib::clear_special_chars('your text', 'utf8');
+	 * 	$str = self::clear_special_chars('your text', 'utf8');
 	 *  // ... or HTML codes only:
-	 * 	$str = Lib::clear_special_chars('your text', 'html');
+	 * 	$str = self::clear_special_chars('your text', 'html');
 	 * 	// ... or combo:
-	 *  $str = Lib::clear_special_chars('your text');
+	 *  $str = self::clear_special_chars('your text');
 	 * </code>
 	 *
 	 * @param 	string $text
@@ -202,13 +202,13 @@ class Lib
     	if ($way)
         	$text = preg_replace_callback(
 				'/(\<\/?)([^<>]+?)(\>)/s',
-				function($m) { return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == '-' && substr(trim($m[2]), 1, 1) != '-') ? $m[0] : $m[1].( substr(trim($m[2]), 0, 1) === "a" ? "%%___"  : "") . Emuravjev\Mdash\Lib::encrypt_tag(trim($m[2])) . $m[3]; },
+				function($m) { return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == '-' && substr(trim($m[2]), 1, 1) != '-') ? $m[0] : $m[1].( substr(trim($m[2]), 0, 1) === "a" ? "%%___"  : "") . self::encrypt_tag(trim($m[2])) . $m[3]; },
 				$text
 			);
         else
         	$text = preg_replace_callback(
 				'/(\<\/?)([^<>]+?)(\>)/s',
-				function($m) { return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == '-' && substr(trim($m[2]), 1, 1) != '-')? $m[0] : $m[1].( substr(trim($m[2]), 0, 3) === "%%___" ? Emuravjev\Mdash\Lib::decrypt_tag(substr(trim($m[2]), 4)) : Emuravjev\Mdash\Lib::decrypt_tag(trim($m[2])) ) . $m[3]; },
+				function($m) { return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == '-' && substr(trim($m[2]), 1, 1) != '-')? $m[0] : $m[1].( substr(trim($m[2]), 0, 3) === "%%___" ? self::decrypt_tag(substr(trim($m[2]), 4)) : self::decrypt_tag(trim($m[2])) ) . $m[3]; },
 				$text
 			);
         return $text;
@@ -224,8 +224,8 @@ class Lib
     public static function decode_internal_blocks($text)
     {
     	$text = preg_replace_callback(
-			'/'.Lib::INTERNAL_BLOCK_OPEN.'([a-zA-Z0-9\/=]+?)'.Lib::INTERNAL_BLOCK_CLOSE.'/s',
-			function($m) { return Emuravjev\Mdash\Lib::decrypt_tag($m[1]); },
+			'/'.self::INTERNAL_BLOCK_OPEN.'([a-zA-Z0-9\/=]+?)'.self::INTERNAL_BLOCK_CLOSE.'/s',
+			function($m) { return self::decrypt_tag($m[1]); },
 			$text
 		);
         return $text;
@@ -239,7 +239,7 @@ class Lib
      */
     public static function iblock($text)
     {
-        return Lib::INTERNAL_BLOCK_OPEN. Lib::encrypt_tag($text).Lib::INTERNAL_BLOCK_CLOSE;
+        return self::INTERNAL_BLOCK_OPEN. self::encrypt_tag($text).self::INTERNAL_BLOCK_CLOSE;
     }
 
     /**
@@ -250,7 +250,7 @@ class Lib
      * @param 	array $attribute список атрибутов, где ключ - имя атрибута, а значение - само значение данного атрибута
      * @return 	string
      */
-    public static function build_safe_tag($content, $tag = 'span', $attribute = array(), $layout = Lib::LAYOUT_STYLE )
+    public static function build_safe_tag($content, $tag = 'span', $attribute = array(), $layout = self::LAYOUT_STYLE )
     {
     	$htmlTag = $tag;
 
@@ -266,7 +266,7 @@ class Lib
     	if (count($attribute))
 		{
 
-			if($layout & Lib::LAYOUT_STYLE)
+			if($layout & self::LAYOUT_STYLE)
 			{
 				if(isset($attribute['__style']) && $attribute['__style'])
 				{
@@ -295,7 +295,7 @@ class Lib
 
 		}
 
-		if( ($layout & Lib::LAYOUT_CLASS ) && $classname) {
+		if( ($layout & self::LAYOUT_CLASS ) && $classname) {
     		$htmlTag .= " class=\"$classname\"";
     	}
 
@@ -663,16 +663,16 @@ class Lib
 	public static function convert_html_entities_to_unicode(&$text)
 	{
 		$text = preg_replace_callback("/\&#([0-9]+)\;/",
-				function($m) { return Emuravjev\Mdash\Lib::_getUnicodeChar(intval($m[1])); },
+				function($m) { return self::_getUnicodeChar(intval($m[1])); },
 				$text
 			);
 		$text = preg_replace_callback("/\&#x([0-9A-F]+)\;/",
-				function($m) { return Emuravjev\Mdash\Lib::_getUnicodeChar(hexdec($m[1])); },
+				function($m) { return self::_getUnicodeChar(hexdec($m[1])); },
 				$text
 			);
 		$text = preg_replace_callback("/\&([a-zA-Z0-9]+)\;/",
 				function($m) {
-					$r = Emuravjev\Mdash\Lib::html_char_entity_to_unicode($m[1]);
+					$r = self::html_char_entity_to_unicode($m[1]);
 					return $r ? $r : $m[0];
 				},
 				$text

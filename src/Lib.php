@@ -6,10 +6,9 @@ class Lib
 {
 	const LAYOUT_STYLE = 1;
 	const LAYOUT_CLASS = 2;
-
+	
 	const INTERNAL_BLOCK_OPEN = '%%%INTBLOCKO235978%%%';
 	const INTERNAL_BLOCK_CLOSE = '%%%INTBLOCKC235978%%%';
-
 	/**
 	 * Таблица символов
 	 *
@@ -45,18 +44,18 @@ class Lib
 		'&' 	=> array('html' => array('&amp;', '&#38;')),
 		'(tm)' 	=> array('html' => array('&trade;', '&#153;'),
 						 'utf8' => array(0x2122)),
-		//'(r)' 	=> array('html' => array('<sup>&reg;</sup>', '&reg;', '&#174;'),
-		'(r)' 	=> array('html' => array('&reg;', '&#174;'),
+		//'(r)' 	=> array('html' => array('<sup>&reg;</sup>', '&reg;', '&#174;'), 
+		'(r)' 	=> array('html' => array('&reg;', '&#174;'), 
 						 'utf8' => array(0x00AE)),
-		'(c)' 	=> array('html' => array('&copy;', '&#169;'),
+		'(c)' 	=> array('html' => array('&copy;', '&#169;'), 
 					     'utf8' => array(0x00A9)),
-		'§' 	=> array('html' => array('&sect;', '&#167;'),
+		'§' 	=> array('html' => array('&sect;', '&#167;'), 
 					     'utf8' => array(0x00A7)),
 		'`' 	=> array('html' => array('&#769;')),
 		'\'' 	=> array('html' => array('&rsquo;', '’')),
-		'x' 	=> array('html' => array('&times;', '&#215;'),
+		'x' 	=> array('html' => array('&times;', '&#215;'), 
 					     'utf8' => array('×') /* какой же у него может быть код? */),
-
+		
 	);
 
 	/**
@@ -67,11 +66,11 @@ class Lib
 	 * @var array
 	 */
 	protected static $_typographSpecificTagId = false;
-
-
+	
+	
 	/**
      * Костыли для работы с символами UTF-8
-     *
+     * 
      * @author	somebody?
      * @param	int $c код символа в кодировке UTF-8 (например, 0x00AB)
      * @return	bool|string
@@ -88,15 +87,15 @@ class Lib
         	     . chr(0x80 | $c >> 6 & 0x3F)
                  . chr(0x80 | $c & 0x3F);
     	} else if ($c <= 0x10FFFF) {
-        	return chr(0xF0 | $c >> 18)
-        		 . chr(0x80 | $c >> 12 & 0x3F)
+        	return chr(0xF0 | $c >> 18) 
+        		 . chr(0x80 | $c >> 12 & 0x3F)                 	
         		 . chr(0x80 | $c >> 6 & 0x3F)
                  . chr(0x80 | $c & 0x3F);
     	} else {
         	return false;
     	}
     }
-
+	
 
 	/**
 	 * Удаление кодов HTML из текста
@@ -122,20 +121,20 @@ class Lib
 		$moder = array();
 		foreach($mode as $mod) if(in_array($mod, array('utf8','html'))) $moder[] = $mod;
 		if(count($moder)==0) return false;
-
-		foreach (self::$_charsTable as $char => $vals)
+		
+		foreach (self::$_charsTable as $char => $vals) 
 		{
-			foreach ($mode as $type)
+			foreach ($mode as $type) 
 			{
-				if (isset($vals[$type]))
+				if (isset($vals[$type])) 
 				{
-					foreach ($vals[$type] as $v)
+					foreach ($vals[$type] as $v) 
 					{
-						if ('utf8' === $type && is_int($v))
+						if ('utf8' === $type && is_int($v)) 
 						{
 							$v = self::_getUnicodeChar($v);
 						}
-						if ('html' === $type)
+						if ('html' === $type) 
 						{
 							if(preg_match("/<[a-z]+>/i",$v))
 							{
@@ -147,10 +146,10 @@ class Lib
 				}
 			}
 		}
-
+		
 		return $text;
 	}
-
+	
 	/**
 	 * Удаление тегов HTML из текста
 	 * Тег <br /> будет преобразов в перенос строки \n, сочетание тегов </p><p> -
@@ -163,17 +162,17 @@ class Lib
 	public static function remove_html_tags($text, $allowableTag = null)
 	{
 		$ignore = null;
-
-		if (null !== $allowableTag)
+		
+		if (null !== $allowableTag) 
 		{
-			if (is_string($allowableTag))
+			if (is_string($allowableTag)) 
 			{
 				$allowableTag = array($allowableTag);
 			}
 			if (is_array($allowableTag))
 			{
-				$tags = array();
-				foreach ($allowableTag as $tag)
+				$tags = array();	
+				foreach ($allowableTag as $tag) 
 				{
 					if ('<' !== substr($tag, 0, 1) || '>' !== substr($tag, -1, 1)) continue;
 					if ('/' === substr($tag, 1, 1)) continue;
@@ -186,27 +185,27 @@ class Lib
 		$text = strip_tags($text, $ignore);
 		return $text;
 	}
-
+	
 	/**
      * Сохраняем содержимое тегов HTML
      *
      * Тег 'a' кодируется со специальным префиксом для дальнейшей
      * возможности выносить за него кавычки.
-     *
+     * 
      * @param 	string $text
      * @param 	bool $safe
      * @return  string
      */
     public static function safe_tag_chars($text, $way)
     {
-    	if ($way)
+    	if ($way) 
         	$text = preg_replace_callback('/(\<\/?)([^<>]+?)(\>)/s', create_function('$m','return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == \'-\' && substr(trim($m[2]), 1, 1) != \'-\')? $m[0] : $m[1].( substr(trim($m[2]), 0, 1) === "a" ? "%%___"  : ""  ) . Emuravjev\Mdash\Lib::encrypt_tag(trim($m[2]))  . $m[3];'), $text);
         else
-        	$text = preg_replace_callback('/(\<\/?)([^<>]+?)(\>)/s', create_function('$m','return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == \'-\' && substr(trim($m[2]), 1, 1) != \'-\')? $m[0] : $m[1].( substr(trim($m[2]), 0, 3) === "%%___" ? Emuravjev\Mdash\Lib::decrypt_tag(substr(trim($m[2]), 4)) : Emuravjev\Mdash\Lib::decrypt_tag(trim($m[2])) ) . $m[3];'), $text);
+        	$text = preg_replace_callback('/(\<\/?)([^<>]+?)(\>)/s', create_function('$m','return (strlen($m[1])==1 && substr(trim($m[2]), 0, 1) == \'-\' && substr(trim($m[2]), 1, 1) != \'-\')? $m[0] : $m[1].( substr(trim($m[2]), 0, 3) === "%%___" ? Emuravjev\Mdash\Lib::decrypt_tag(substr(trim($m[2]), 4)) : Emuravjev\Mdash\Lib::decrypt_tag(trim($m[2])) ) . $m[3];'), $text);	
         return $text;
     }
-
-
+    
+    
     /**
      * Декодриует спец блоки
      *
@@ -215,10 +214,10 @@ class Lib
      */
     public static function decode_internal_blocks($text)
     {
-    	$text = preg_replace_callback('/'.Lib::INTERNAL_BLOCK_OPEN.'([a-zA-Z0-9\/=]+?)'.Lib::INTERNAL_BLOCK_CLOSE.'/s', create_function('$m','return Emuravjev\Mdash\Lib::decrypt_tag($m[1]);'), $text);
+    	$text = preg_replace_callback('/'.Lib::INTERNAL_BLOCK_OPEN.'([a-zA-Z0-9\/=]+?)'.Lib::INTERNAL_BLOCK_CLOSE.'/s', create_function('$m','return Emuravjev\Mdash\Lib::decrypt_tag($m[1]);'), $text);	
         return $text;
     }
-
+    
     /**
      * Кодирует спец блок
      *
@@ -229,32 +228,33 @@ class Lib
     {
         return Lib::INTERNAL_BLOCK_OPEN. Lib::encrypt_tag($text).Lib::INTERNAL_BLOCK_CLOSE;
     }
-
+    
+    
     /**
-     * Создание тега с защищенным содержимым
+     * Создание тега с защищенным содержимым 
      *
      * @param 	string $content текст, который будет обрамлен тегом
-     * @param 	string $tag тэг
+     * @param 	string $tag тэг 
      * @param 	array $attribute список атрибутов, где ключ - имя атрибута, а значение - само значение данного атрибута
      * @return 	string
      */
     public static function build_safe_tag($content, $tag = 'span', $attribute = array(), $layout = Lib::LAYOUT_STYLE )
     {
     	$htmlTag = $tag;
-
-    	if (self::$_typographSpecificTagId)
+		
+    	if (self::$_typographSpecificTagId) 
     	{
-    		if(!isset($attribute['id']))
+    		if(!isset($attribute['id'])) 
     		{
     			$attribute['id'] = 'emt-2' . mt_rand(1000,9999);
     		}
     	}
-
+    	
 		$classname = "";
-    	if (count($attribute))
+    	if (count($attribute)) 
 		{
-
-			if($layout & Lib::LAYOUT_STYLE)
+			
+			if($layout & lib::LAYOUT_STYLE)
 			{
 				if(isset($attribute['__style']) && $attribute['__style'])
 				{
@@ -269,9 +269,9 @@ class Lib
 					}
 					unset($attribute['__style']);
 				}
-
-			}
-			foreach ($attribute as $attr => $value)
+				
+			}			
+			foreach ($attribute as $attr => $value) 
 			{
 				if($attr == "__style") continue;
 				if($attr == "class") {
@@ -280,16 +280,16 @@ class Lib
 				}
 				$htmlTag .= " $attr=\"$value\"";
 			}
-
+			
 		}
-
+    	
 		if( ($layout & Lib::LAYOUT_CLASS ) && $classname) {
     		$htmlTag .= " class=\"$classname\"";
     	}
-
+    	
 		return "<" . self::encrypt_tag($htmlTag) . ">$content</" . self::encrypt_tag($tag) . ">";
     }
-
+    
     /**
      * Метод, осуществляющий кодирование (сохранение) информации
      * с целью невозможности типографировать ее
@@ -301,7 +301,7 @@ class Lib
     {
     	return base64_encode($text)."=";
     }
-
+    
     /**
      * Метод, осуществляющий декодирование информации
      *
@@ -312,9 +312,9 @@ class Lib
     {
     	return base64_decode(substr($text,0,-1));
     }
-
-
-
+    
+    
+    
     public static function strpos_ex(&$haystack, $needle, $offset = null)
     {
     	if(is_array($needle))
@@ -340,9 +340,9 @@ class Lib
     		if($m === false) return false;
     		return array('pos' => $m, 'str' => $w);
     	}
-    	return strpos($haystack, $needle, $offset);
+    	return strpos($haystack, $needle, $offset);    	
     }
-
+    
     public static function _process_selector_pattern(&$pattern)
 	{
 		if($pattern===false) return;
@@ -355,27 +355,27 @@ class Lib
 		if($pattern === false) return true;
 		return preg_match($pattern, $text);
 	}
-
+	
     public static function strtolower($string)
-    {
-		$convert_to = array(
-			"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-			"v", "w", "x", "y", "z", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï",
-			"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "а", "б", "в", "г", "д", "е", "ё", "ж",
-			"з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы",
-			"ь", "э", "ю", "я"
-		);
-		$convert_from = array(
-			"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
-			"V", "W", "X", "Y", "Z", "À", "Á", "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï",
-			"Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж",
-			"З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ъ",
-			"Ь", "Э", "Ю", "Я"
-		);
-
-		return str_replace($convert_from, $convert_to, $string);
-	}
-
+    { 
+		$convert_to = array( 
+			"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", 
+			"v", "w", "x", "y", "z", "à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
+			"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "а", "б", "в", "г", "д", "е", "ё", "ж", 
+			"з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", 
+			"ь", "э", "ю", "я" 
+		); 
+		$convert_from = array( 
+			"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", 
+			"V", "W", "X", "Y", "Z", "À", "Á", "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", 
+			"Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", 
+			"З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ъ", 
+			"Ь", "Э", "Ю", "Я" 
+		); 
+		
+		return str_replace($convert_from, $convert_to, $string); 
+	} 
+	
 	// взято с http://www.w3.org/TR/html4/sgml/entities.html
 	protected static $html4_char_ents = array(
 		'nbsp' => 160,
@@ -642,7 +642,7 @@ class Lib
 		if(isset(self::$html4_char_ents[$entity])) return self::_getUnicodeChar(self::$html4_char_ents[$entity]);
 		return false;
 	}
-
+	
 	/**
 	 * Сконвериторвать все html entity в соответсвующие юникод символы
 	 *
@@ -650,19 +650,19 @@ class Lib
 	 */
 	public static function convert_html_entities_to_unicode(&$text)
 	{
-		$text = preg_replace_callback("/\&#([0-9]+)\;/",
+		$text = preg_replace_callback("/\&#([0-9]+)\;/", 
 				create_function('$m', 'return Emuravjev\Mdash\Lib::_getUnicodeChar(intval($m[1]));')
 				, $text);
-		$text = preg_replace_callback("/\&#x([0-9A-F]+)\;/",
+		$text = preg_replace_callback("/\&#x([0-9A-F]+)\;/", 
 				create_function('$m', 'return Emuravjev\Mdash\Lib::_getUnicodeChar(hexdec($m[1]));')
 				, $text);
-		$text = preg_replace_callback("/\&([a-zA-Z0-9]+)\;/",
+		$text = preg_replace_callback("/\&([a-zA-Z0-9]+)\;/", 
 				create_function('$m', '$r = Emuravjev\Mdash\Lib::html_char_entity_to_unicode($m[1]); return $r ? $r : $m[0];')
 				, $text);
 	}
-
+	
 	public static function rstrpos ($haystack, $needle, $offset = 0){
-
+	    
 	    if(trim($haystack) != "" && trim($needle) != "" && $offset <= mb_strlen($haystack))
 	    {
 	        $last_pos = $offset;
@@ -684,15 +684,41 @@ class Lib
 	    else
 	    {
 	        return false;
-	    }
+	    } 
 	}
-
+	
 	public static function ifop($cond, $true, $false) {
 		return $cond ? $true : $false;
 	}
-
+	
 	public static function split_number($num) {
 		return number_format($num, 0, '', ' ');
 	}
 
+	// https://mathiasbynens.be/demo/url-regex
+	// @gruber v2 (218 chars)
+	public static function url_regex() {
+		/*return <<<URLREGEX
+_(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)(?:\.(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)*(?:\.(?:[a-z\x{00a1}-\x{ffff}]{2,})))(?::\d{2,5})?(?:/[^\s]*)?_iuS
+URLREGEX;
+		*/
+		return <<<URLREGEX
+#(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))#iS
+URLREGEX;
+
+		/*
+		return <<<URLREGEX
+/([a-z][a-z0-9\*\-\.]*):\/\/(?:(?:(?:[\w\.\-\+!$&'\(\)*\+,;=]|%[0-9a-f]{2})+:)*(?:[\w\.\-\+%!$&'\(\)*\+,;=]|%[0-9a-f]{2})+@)?(?:(?:[a-z0-9\-\.]|%[0-9a-f]{2})+|(?:\[(?:[0-9a-f]{0,4}:)*(?:[0-9a-f]{0,4})\]))(?::[0-9]+)?(?:[\/|\?](?:[\w#!:\.\?\+=&@!$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})*)?/xiS
+URLREGEX;
+*/
+	}
+	
+	// https://emailregex.com/
+	public static function email_regex() {
+		$z = <<<EMAILREGEX
+(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
+EMAILREGEX;
+		$z = '~'. str_replace('~', '\\'.'~', $z) . '~imS';
+		return $z;
+	}
 }

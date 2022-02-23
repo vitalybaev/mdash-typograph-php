@@ -19,9 +19,9 @@ class TypographBase
 	 *
 	 * @var array
 	 */
-	protected $trets = array() ;
-	protected $trets_index = array() ;
-	protected $tret_objects = array() ;
+	protected $trets = array() ; 
+	protected $trets_index = array() ; 
+	protected $tret_objects = array() ; 
 
 	public $ok             = false;
 	public $debug_enabled  = false;
@@ -29,37 +29,37 @@ class TypographBase
 	public $logs           = array();
 	public $errors         = array();
 	public $debug_info     = array();
-
+	
 	private $use_layout = false;
 	private $class_layout_prefix = false;
 	private $use_layout_set = false;
 	public $disable_notg_replace = false;
 	public $remove_notg = false;
-
+	
 	public $settings = array();
-
+	
 	protected function log($str, $data = null)
 	{
 		if(!$this->logging) return;
 		$this->logs[] = array('class' => '', 'info' => $str, 'data' => $data);
 	}
-
+	
 	protected function tret_log($tret, $str, $data = null)
 	{
 		$this->logs[] = array('class' => $tret, 'info' => $str, 'data' => $data);
 	}
-
+		
 	protected function error($info, $data = null)
 	{
 		$this->errors[] = array('class' => '', 'info' => $info, 'data' => $data);
-		$this->log("ERROR $info", $data );
+		$this->log("ERROR $info", $data );		
 	}
-
+	
 	protected function tret_error($tret, $info, $data = null)
 	{
 		$this->errors[] = array('class' => $tret, 'info' => $info, 'data' => $data);
 	}
-
+	
 	protected function debug($class, $place, &$after_text, $after_text_raw = "")
 	{
 		if(!$this->debug_enabled) return;
@@ -71,12 +71,14 @@ class TypographBase
 				'text_raw'  => $after_text_raw,
 			);
 	}
-
-
-
+	
+	
+	
 	protected $_safe_blocks = array();
-
-
+	protected $_safe_sequences = array();
+	protected $_safe_sequence_mark = "SAFESEQUENCENUM";
+	
+	
 	/**
 	 * Включить режим отладки, чтобы посмотреть последовательность вызовов
 	 * третов и правил после
@@ -86,7 +88,7 @@ class TypographBase
 	{
 		$this->debug_enabled = true;
 	}
-
+	
 	/**
 	 * Включить режим отладки, чтобы посмотреть последовательность вызовов
 	 * третов и правил после
@@ -96,7 +98,7 @@ class TypographBase
 	{
 		$this->logging = true;
 	}
-
+	
 	/**
      * Добавление защищенного блока
      *
@@ -104,7 +106,7 @@ class TypographBase
      *  Jare_Typograph_Tool::addCustomBlocks('<span>', '</span>');
      *  Jare_Typograph_Tool::addCustomBlocks('\<nobr\>', '\<\/span\>', true);
      * </code>
-     *
+     * 
      * @param 	string $id идентификатор
      * @param 	string $open начало блока
      * @param 	string $close конец защищенного блока
@@ -120,7 +122,39 @@ class TypographBase
     			'close' =>  $close,
     		);
     }
-
+    
+    /**
+     * Добавление защищенного блока
+     *
+     * @param 	string $type тип последовательности
+     *            0 - URL
+     *            1 - почта
+     * @param 	string $content реальное содержимое
+     * @return  void
+     */
+    private function _add_safe_sequence($type, $content)
+    {
+    	$this->_safe_sequences[] = array(
+    			'type' => $type,
+    			'content' =>  $content,
+    		);
+    }
+    
+    /**
+     * Вычисляем тэг, которого нет в заданном тексте
+     *
+     * @return 	array
+     */
+    protected function detect_safe_mark() {
+    	$seq = $this->_safe_sequence_mark;
+    	$i = 0;
+    	while(strpos($this->_text, $seq) !== false) {
+    		$seq = str_replace("SAFESEQUENCENUM","SAFESEQUENCE".$i."NUM", $this->_safe_sequence_mark);
+    		$i++;
+    	}
+    	$this->_safe_sequence_mark = $seq;
+    }
+    
     /**
      * Список защищенных блоков
      *
@@ -130,11 +164,21 @@ class TypographBase
     {
     	return $this->_safe_blocks;
     }
-
+    
+    /**
+     * Список защищенных последовательностей
+     *
+     * @return 	array
+     */
+    public function get_all_safe_sequences()
+    {
+    	return $this->_safe_sequences;
+    }
+    
     /**
      * Удаленного блока по его номеру ключа
      *
-     * @param 	string $id идентифиактор защищённого блока
+     * @param 	string $id идентифиактор защищённого блока 
      * @return  void
      */
     public function remove_safe_block($id)
@@ -143,8 +187,7 @@ class TypographBase
     		if($block['id']==$id) unset($this->_safe_blocks[$k]);
     	}
     }
-
-
+    
     /**
      * Добавление защищенного блока
      *
@@ -152,14 +195,14 @@ class TypographBase
      * @return  void
      */
     public function add_safe_tag($tag)
-    {
+    {      	
     	$open = preg_quote("<", '/'). $tag."[^>]*?" .  preg_quote(">", '/');
     	$close = preg_quote("</$tag>", '/');
     	$this->_add_safe_block($tag, $open, $close, $tag);
     	return true;
     }
-
-
+    
+    
     /**
      * Добавление защищенного блока
      *
@@ -172,46 +215,121 @@ class TypographBase
     {
     	$open = trim($open);
     	$close = trim($close);
-
-    	if (empty($open) || empty($close))
+    	
+    	if (empty($open) || empty($close)) 
     	{
     		return false;
     	}
-
-    	if (false === $quoted)
+    	
+    	if (false === $quoted) 
     	{
     		$open = preg_quote($open, '/');
             $close = preg_quote($close, '/');
     	}
-
+    	
     	$this->_add_safe_block($id, $open, $close, "");
     	return true;
     }
-
-
+    
+    
     /**
      * Сохранение содержимого защищенных блоков
      *
      * @param   string $text
-     * @param   bool $safe если true, то содержимое блоков будет сохранено, иначе - раскодировано.
+     * @param   bool $safe если true, то содержимое блоков будет сохранено, иначе - раскодировано. 
      * @return  string
      */
     public function safe_blocks($text, $way, $show = true)
     {
-    	if (count($this->_safe_blocks))
+    	if (count($this->_safe_blocks)) 
     	{
     		$safeType = true === $way ? "Emuravjev\Mdash\Lib::encrypt_tag(\$m[2])" : "stripslashes(Emuravjev\Mdash\Lib::decrypt_tag(\$m[2]))";
     		$safeblocks = true === $way ? $this->_safe_blocks : array_reverse($this->_safe_blocks);
-       		foreach ($safeblocks as $block)
+       		foreach ($safeblocks as $block) 
        		{
         		$text = preg_replace_callback("/({$block['open']})(.+?)({$block['close']})/s",   create_function('$m','return $m[1].'.$safeType . '.$m[3];')   , $text);
         	}
     	}
-
+    	
     	return $text;
     }
-
-
+    
+    /**
+     * Кодирование УРЛа
+     *
+     * @param regex array $m
+     * @return unknown
+     */
+    function safe_sequence_url($m) {
+    	$id = count($this->_safe_sequences);
+    	$this->_add_safe_sequence(0, $m[0]);
+    	return "http://mdash.ru/A0".$this->_safe_sequence_mark.$id."ID";
+    }
+    
+    /**
+     * Кодирование Почты
+     *
+     * @param regex array $m
+     * @return unknown
+     */
+    function safe_sequence_email($m) {
+    	$id = count($this->_safe_sequences);
+    	$this->_add_safe_sequence(1, $m[0]);
+    	return "A1".$this->_safe_sequence_mark.$id."ID@mdash.ru";
+    }
+    
+    /**
+     * Декодирование УРЛа
+     *
+     * @param regex array $m
+     * @return unknown
+     */
+    function unsafe_sequence_url($m) {
+    	return $this->_safe_sequences[$m[1]]['content'];
+    }
+    
+    /**
+     * Декодирование УРЛа с удалением http://
+     *
+     * @param regex array $m
+     * @return unknown
+     */
+    function unsafe_sequence_url_nohttp($m) {
+    	$z = $this->_safe_sequences[$m[1]]['content'];
+    	return preg_replace("~([^:]+)://~", "", $z);
+    }
+    
+    
+    /**
+     * Декодирование Почты
+     *
+     * @param regex array $m
+     * @return unknown
+     */
+    function unsafe_sequence_email($m) {
+    	return $this->_safe_sequences[$m[1]]['content'];
+    }
+    
+    /**
+     * Сохранение защищенных последовательностей
+     *
+     * @param   string $text
+     * @param   bool $safe если true, то содержимое блоков будет сохранено, иначе - раскодировано. 
+     * @return  string
+     */
+    public function safe_sequences($text, $way, $show = true)
+    {
+    	if(true === $way) {
+    		$text = preg_replace_callback(Lib::url_regex(), array($this, "safe_sequence_url") , $text);
+    		$text = preg_replace_callback(Lib::email_regex(), array($this, "safe_sequence_email") , $text);
+    	} else {
+    		$text = preg_replace_callback('~http://mdash.ru/A0'.$this->_safe_sequence_mark.'(\d+)ID~ims', array($this, "unsafe_sequence_url") , $text);
+    		$text = preg_replace_callback('~mdash.ru/A0'.$this->_safe_sequence_mark.'(\d+)ID~ims', array($this, "unsafe_sequence_url_nohttp") , $text);
+    		$text = preg_replace_callback('~A1'.$this->_safe_sequence_mark.'(\d+)ID@mdash.ru~ims', array($this, "unsafe_sequence_email") , $text);
+    	}
+    	return $text;
+    }
+    
      /**
      * Декодирование блоков, которые были скрыты в момент типографирования
      *
@@ -222,33 +340,47 @@ class TypographBase
     {
 		return Lib::decode_internal_blocks($text);
     }
-
-
+	
+	
 	private function create_object($tret)
 	{
 		$tret = "Emuravjev\\Mdash\\Tret\\" . $tret;
 
+		// if(!class_exists($tret))
+		// {
+		// 	if(preg_match("/^EMT_Tret_([a-zA-Z0-9_]+)$/",$tret, $m))
+		// 	{
+		// 		$tname = $m[1];
+		// 		$fname = str_replace("_"," ",$tname);
+		// 		$fname = ucwords($fname);
+		// 		$fname = str_replace(" ",".",$fname);
+		// 		//if(file_exists("EMT.Tret.".$fname.".php"))
+		// 		{					
+		// 			require_once("EMT.Tret.".$fname.".php");
+		// 		}				
+		// 	}
+		// }
 		if(!class_exists($tret))
 		{
 			$this->error("Класс $tret не найден. Пожалуйста, подргузите нужный файл.");
 			return null;
 		}
-
+		
 		$obj = new $tret();
 		$obj->EMT     = $this;
 		$obj->logging = $this->logging;
 		return $obj;
 	}
-
+	
 	private function get_short_tret($tretname)
 	{
-        if(preg_match("/^EMT_Tret_([a-zA-Z0-9_]+)$/",$tretname, $m))
+		if(preg_match("/^EMT_Tret_([a-zA-Z0-9_]+)$/",$tretname, $m))
 		{
 			return $m[1];
 		}
 		return $tretname;
 	}
-
+	
 	private function _init()
 	{
 		foreach($this->trets as $tret)
@@ -258,7 +390,7 @@ class TypographBase
 			if($obj == null) continue;
 			$this->tret_objects[$tret] = $obj;
 		}
-
+		
 		if(!$this->inited)
 		{
 			$this->add_safe_tag('pre');
@@ -268,12 +400,14 @@ class TypographBase
 			$this->add_safe_block('span-notg', '<span class="_notg_start"></span>', '<span class="_notg_end"></span>');
 		}
 		$this->inited = true;
+		
+		$this->detect_safe_mark();
 	}
-
-
-
-
-
+	
+	
+	
+	
+	
 	/**
 	 * Инициализация класса, используется чтобы задать список третов или
 	 * список защищённых блоков, которые можно использовать.
@@ -282,26 +416,28 @@ class TypographBase
 	 */
 	public function init()
 	{
-
+		
 	}
-
+	
 	/**
-	 * Добавить Трэт,
+	 * Добавить Трэт, 
 	 *
 	 * @param mixed $class - имя класса трета, или сам объект
 	 * @param string $altname - альтернативное имя, если хотим например иметь два одинаоковых терта в обработке
- 	 * @return mixed
+ 	 * @return unknown
 	 */
 	public function add_tret($class, $altname = false)
 	{
 		if(is_object($class))
 		{
+			// if(!is_a($class, "EMT_Tret"))
 			if(!is_a($class, "Tret\Base"))
 			{
+				// $this->error("You are adding Tret that doesn't inherit base class EMT_Tret", get_class($class));
 				$this->error("You are adding Tret that doesn't inherit base class Tret\Base", get_class($class));
-				return false;
+				return false;	
 			}
-
+			
 			$class->EMT     = $this;
 			$class->logging = $this->logging;
 			$this->tret_objects[($altname ? $altname : get_class($class))] = $class;
@@ -320,11 +456,11 @@ class TypographBase
 		$this->error("Чтобы добавить трэт необходимо передать имя или объект");
 		return false;
 	}
-
+	
 	/**
 	 * Получаем ТРЕТ по идентификатору, т.е. названию класса
 	 *
-	 * @param mixed $name
+	 * @param unknown_type $name
 	 */
 	public function get_tret($name)
 	{
@@ -345,7 +481,7 @@ class TypographBase
 		$this->error("Трэт с идентификатором $name не найден");
 		return false;
 	}
-
+	
 	/**
 	 * Задаём текст для применения типографа
 	 *
@@ -355,9 +491,9 @@ class TypographBase
 	{
 		$this->_text = $text;
 	}
-
-
-
+	
+	
+	
 	/**
 	 * Запустить типограф на выполнение
 	 *
@@ -365,81 +501,89 @@ class TypographBase
 	public function apply($trets = null)
 	{
 		$this->ok = false;
-
+		
 		$this->init();
-		$this->_init();
-
+		$this->_init();		
+		
 		$atrets = $this->trets;
 		if(is_string($trets)) $atrets = array($trets);
 		elseif(is_array($trets)) $atrets = $trets;
-
+		
 		$this->debug($this, 'init', $this->_text);
-
+		
+		$this->_text = $this->safe_sequences($this->_text, true);
+		$this->debug($this, 'safe_sequences', $this->_text);
+		
 		$this->_text = $this->safe_blocks($this->_text, true);
 		$this->debug($this, 'safe_blocks', $this->_text);
-
+		
 		$this->_text = Lib::safe_tag_chars($this->_text, true);
 		$this->debug($this, 'safe_tag_chars', $this->_text);
-
+		
 		$this->_text = Lib::clear_special_chars($this->_text);
 		$this->debug($this, 'clear_special_chars', $this->_text);
-
-		foreach ($atrets as $tret)
+		
+		
+		foreach ($atrets as $tret) 		
 		{
 			// если установлен режим разметки тэгов то выставим его
 			if($this->use_layout_set)
 				$this->tret_objects[$tret]->set_tag_layout_ifnotset($this->use_layout);
-
+				
 			if($this->class_layout_prefix)
 				$this->tret_objects[$tret]->set_class_layout_prefix($this->class_layout_prefix);
-
+			
 			// влючаем, если нужно
 			if($this->debug_enabled) $this->tret_objects[$tret]->debug_on();
 			if($this->logging) $this->tret_objects[$tret]->logging = true;
-
+						
 			// применяем трэт
 			//$this->tret_objects[$tret]->set_text(&$this->_text);
 			$this->tret_objects[$tret]->set_text($this->_text);
 			$this->tret_objects[$tret]->apply();
-
+			
 			// соберём ошибки если таковые есть
 			if(count($this->tret_objects[$tret]->errors)>0)
-				foreach($this->tret_objects[$tret]->errors as $err )
+				foreach($this->tret_objects[$tret]->errors as $err ) 
 					$this->tret_error($tret, $err['info'], $err['data']);
-
-			// логгирование
+			
+			// логгирование 
 			if($this->logging)
 				if(count($this->tret_objects[$tret]->logs)>0)
-					foreach($this->tret_objects[$tret]->logs as $log )
-						$this->tret_log($tret, $log['info'], $log['data']);
-
+					foreach($this->tret_objects[$tret]->logs as $log ) 
+						$this->tret_log($tret, $log['info'], $log['data']);				
+			
 			// отладка
-			if($this->debug_enabled) {
+			if($this->debug_enabled)
 				foreach($this->tret_objects[$tret]->debug_info as $di)
 				{
 					$unsafetext = $di['text'];
 					$unsafetext = Lib::safe_tag_chars($unsafetext, false);
-					$unsafetext = $this->safe_blocks($unsafetext, false);
+					$unsafetext = $this->safe_blocks($unsafetext, false);		
 					$this->debug($tret, $di['place'], $unsafetext, $di['text']);
 				}
-			}
+					
+			
 		}
-
-
+		
+		
 		$this->_text = $this->decode_internal_blocks($this->_text);
 		$this->debug($this, 'decode_internal_blocks', $this->_text);
-
+		
 		if($this->is_on('dounicode'))
 		{
 			Lib::convert_html_entities_to_unicode($this->_text);
 		}
-
+		
 		$this->_text = Lib::safe_tag_chars($this->_text, false);
 		$this->debug($this, 'unsafe_tag_chars', $this->_text);
-
-		$this->_text = $this->safe_blocks($this->_text, false);
+		
+		$this->_text = $this->safe_blocks($this->_text, false);		
 		$this->debug($this, 'unsafe_blocks', $this->_text);
-
+		
+		$this->_text = $this->safe_sequences($this->_text, false);
+		$this->debug($this, 'unsafe_sequences', $this->_text);
+		
 		if(!$this->disable_notg_replace)
 		{
 			$repl = array('<span class="_notg_start"></span>', '<span class="_notg_end"></span>');
@@ -450,10 +594,10 @@ class TypographBase
 		$this->ok = (count($this->errors)==0);
 		return $this->_text;
 	}
-
+	
 	/**
 	 * Получить содержимое <style></style> при использовании классов
-	 *
+	 * 
 	 * @param bool $list false - вернуть в виде строки для style или как массив
 	 * @param bool $compact не выводить пустые классы
 	 * @return string|array
@@ -461,9 +605,9 @@ class TypographBase
 	public function get_style($list = false, $compact = false)
 	{
 		$this->_init();
-
+		
 		$res = array();
-		foreach ($this->trets as $tret)
+		foreach ($this->trets as $tret) 		
 		{
 			$arr =$this->tret_objects[$tret]->classes;
 			if(!is_array($arr)) continue;
@@ -482,11 +626,11 @@ class TypographBase
 		}
 		return $str;
 	}
-
-
-
-
-
+	
+	
+	
+	
+	
 	/**
 	 * Установить режим разметки,
 	 *   Lib::LAYOUT_STYLE - с помощью стилей
@@ -500,7 +644,7 @@ class TypographBase
 		$this->use_layout = $layout;
 		$this->use_layout_set = true;
 	}
-
+	
 	/**
 	 * Установить префикс для классов
 	 *
@@ -510,7 +654,7 @@ class TypographBase
 	{
 		$this->class_layout_prefix = $prefix === true ? "emt_" : $prefix;
 	}
-
+	
 	/**
 	 * Включить/отключить правила, согласно карте
 	 * Формат карты:
@@ -518,9 +662,9 @@ class TypographBase
 	 *    'Название трэта 2' => array ( 'правило1', 'правило2' , ...  )
 	 *
 	 * @param array $map
-	 * @param bool $disable если ложно, то $map соотвествует тем правилам, которые надо включить
+	 * @param boolean $disable если ложно, то $map соотвествует тем правилам, которые надо включить
 	 *                         иначе это список правил, которые надо выключить
-	 * @param bool $strict строго, т.е. те которые не в списке будут тоже обработаны
+	 * @param boolean $strict строго, т.е. те которые не в списке будут тоже обработаны
 	 */
 	public function set_enable_map($map, $disable = false, $strict = true)
 	{
@@ -535,7 +679,7 @@ class TypographBase
 				continue;
 			}
 			$trets[] = $tretx;
-
+			
 			if($list === true) // все
 			{
 				$tretx->activate(array(), !$disable ,  true);
@@ -553,10 +697,10 @@ class TypographBase
 				$this->tret_objects[$tret]->activate(array(), $disable ,  true);
 			}
 		}
-
+		
 	}
-
-
+	
+	
 	/**
 	 * Установлена ли настройка
 	 *
@@ -568,8 +712,8 @@ class TypographBase
 		$kk = $this->settings[$key];
 		return ((strtolower($kk)=="on") || ($kk === "1") || ($kk === true) || ($kk === 1));
 	}
-
-
+	
+	
 	/**
 	 * Установить настройку
 	 *
@@ -597,8 +741,8 @@ class TypographBase
 		Lib::_process_selector_pattern($tret_pattern);
 		Lib::_process_selector_pattern($rule_pattern);
 		if($selector == "*") $this->settings[$key] = $value;
-
-		foreach ($this->trets as $tret)
+		
+		foreach ($this->trets as $tret) 		
 		{
 			$t1 = $this->get_short_tret($tret);
 			if(!Lib::_test_pattern($tret_pattern, $t1))	if(!Lib::_test_pattern($tret_pattern, $tret)) continue;
@@ -625,8 +769,8 @@ class TypographBase
 			}
 		}
 	}
-
-
+	
+	
 	/**
 	 * Установить настройки для тертов и правил
 	 * 	1. если селектор является массивом, то тогда установка правил будет выполнена для каждого
@@ -634,7 +778,7 @@ class TypographBase
 	 *  2. Если $key не является массивом, то эта настройка будет проставлена согласно селектору
 	 *  3. Если $key массив - то будет задана группа настроек
 	 *       - если $value массив , то настройки определяются по ключам из массива $key, а значения из $value
-	 *       - иначе, $key содержит ключ-значение как массив
+	 *       - иначе, $key содержит ключ-значение как массив  
 	 *  4. $exact_match - если true тогда array selector будет соответсвовать array $key, а не произведению массивов
 	 *
 	 * @param mixed $selector
@@ -660,7 +804,7 @@ class TypographBase
 			}
 			return ;
 		}
-		if(is_array($selector))
+		if(is_array($selector)) 
 		{
 			foreach($selector as $val) $this->set($val, $key, $value);
 			return;
@@ -683,8 +827,8 @@ class TypographBase
 		}
 		$this->doset($selector, $key, $value);
 	}
-
-
+	
+	
 	/**
 	 * Возвращает список текущих третов, которые установлены
 	 *
@@ -693,7 +837,7 @@ class TypographBase
 	{
 		return $this->trets;
 	}
-
+	
 	/**
 	 * Установка одной метанастройки
 	 *
@@ -702,10 +846,10 @@ class TypographBase
 	 */
 	public function do_setup($name, $value)
 	{
-
+		
 	}
-
-
+	
+	
 	/**
 	 * Установить настройки
 	 *
@@ -714,15 +858,15 @@ class TypographBase
 	public function setup($setupmap)
 	{
 		if(!is_array($setupmap)) return;
-
+		
 		if(isset($setupmap['map']) || isset($setupmap['maps']))
 		{
 			if(isset($setupmap['map']))
 			{
-				$ret['map'] = $test['params']['map'];
-				$ret['disable'] = $test['params']['map_disable'];
-				$ret['strict'] = $test['params']['map_strict'];
-				$test['params']['maps'] = array($ret);
+				$ret['map'] = $setupmap['map'];
+				$ret['disable'] = $setupmap['map_disable'];
+				$ret['strict'] = $setupmap['map_strict'];
+				$setupmap['maps'] = array($ret);
 				unset($setupmap['map']);
 				unset($setupmap['map_disable']);
 				unset($setupmap['map_strict']);
@@ -730,18 +874,22 @@ class TypographBase
 			if(is_array($setupmap['maps']))
 			{
 				foreach($setupmap['maps'] as $map)
-				{
+				{ 
 					$this->set_enable_map
-								($map['map'],
+								($map['map'], 
 								isset($map['disable']) ? $map['disable'] : false,
-								isset($map['strict']) ? $map['strict'] : false
+								isset($map['strict']) ? $map['strict'] : false 
 							);
 				}
 			}
 			unset($setupmap['maps']);
 		}
-
-
+		
+		
 		foreach($setupmap as $k => $v) $this->do_setup($k , $v);
 	}
+	
+	
+	
+	
 }

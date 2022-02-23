@@ -9,8 +9,8 @@ namespace Emuravjev\Mdash\Tret;
 class Number extends Base
 {
 	public $title = "Числа, дроби, математические знаки";
-
-
+	
+	
 	public $rules = array(
 		'minus_between_nums' => array(
 				'description'	=> 'Расстановка знака минус между числами',
@@ -38,11 +38,6 @@ class Number extends Base
 				'pattern' 		=> '/([a-zа-яё0-9])\^([\d]{1,3})([^а-яёa-z0-9]|$)/ieu',
 				'replacement' 	=> '$m[1] . $this->tag($this->tag($m[2],"small"),"sup") . $m[3]'
 			),
-		'dimensions_sup' => array(
-				'description'	=> 'Верхний индекс для см2, м2...',
-				'pattern' 		=> '/(м|мм|см|дм|км|гм|m|km|dm|cm|mm)([\d]{1,3})([^а-яёa-z0-9]|$)/ieu',
-				'replacement' 	=> '$m[1] . $this->tag($this->tag($m[2],"small"),"sup") . $m[3]'
-			),
 		'simple_fraction' => array(
 				'description'	=> 'Замена дробей 1/2, 1/4, 3/4 на соответствующие символы',
 				'pattern' 		=> array('/(^|\D)1\/(2|4)(\D)/', '/(^|\D)3\/4(\D)/'),
@@ -52,20 +47,20 @@ class Number extends Base
 				'description'	=> 'Математические знаки больше/меньше/плюс минус/неравно',
 				'pattern' 		=> array('/!=/', '/\<=/', '/([^=]|^)\>=/', '/~=/', '/\+-/'),
 				'replacement' 	=> array('&ne;', '&le;', '\1&ge;', '&cong;', '&plusmn;' )
-			),
-
+			),			
+				
 		'thinsp_between_number_triads' => array(
-				'description'	=> 'Объединение триад чисел полупробелом',
+				'description'	=> 'Объединение триад чисел полупробелом',			
 				'pattern' 		=> '/([0-9]{1,3}( [0-9]{3}){1,})(.|$)/ue',
 				'replacement' 	=> '($m[3]=="-"? $m[0]:str_replace(" ","&thinsp;",$m[1]).$m[3])'
 			),
 		'thinsp_between_no_and_number' => array(
-				'description'	=> 'Пробел между симоволом номера и числом',
+				'description'	=> 'Пробел между симоволом номера и числом',			
 				'pattern' 		=> '/(№|\&#8470\;)(\s|&nbsp;)*(\d)/iu',
 				'replacement' 	=> '&#8470;&thinsp;\3'
 			),
 		'thinsp_between_sect_and_number' => array(
-				'description'	=> 'Пробел между параграфом и числом',
+				'description'	=> 'Пробел между параграфом и числом',			
 				'pattern' 		=> '/(§|\&sect\;)(\s|&nbsp;)*(\d+|[IVX]+|[a-zа-яё]+)/ui',
 				'replacement' 	=> '&sect;&thinsp;\3'
 			),

@@ -60,6 +60,7 @@ class Typograph extends TypographBase
 		'Number.auto_times_x' => 'direct',
 		'Number.simple_fraction' => 'direct',
 		'Number.math_chars' => 'direct',
+		'Number.numeric_sub' => 'direct',
 		'Number.thinsp_between_number_triads' => 'direct',
 		'Number.thinsp_between_no_and_number' => 'direct',
 		'Number.thinsp_between_sect_and_number' => 'direct',
